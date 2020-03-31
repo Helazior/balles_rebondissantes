@@ -6,4 +6,10 @@ Pour mieux comprendre les collisions, je me suis amusé à reproduire des balles
 
 Pour changer les paramètres du jeu (taille des balles, rebond, vitesse du jeu etc. Il faut se rendre dans le main.py directement).
 
-Cette version est terminée, mais je continuerai peut-être en rajoutant d'autres formes, l'effet de la balle ou autre.
+Cette version fonctionne, mais reste à rajouter:
+-Les balles plus grosses doivent avoir un masse plus importante
+-Optimisation des balles quand elles ne bougent pas (si les forces se compensent parfaitements, ne plus faire bouger la balle jusqu'à ce qu'une des forces soit modifiée), ça évitera des calcules inutiles;
+-Pouvoir enregistrer le décor dans un fichier.
+-Enregistrer la dernière modification pour pouvoir revenir en arrière.
+-Mettre des frottements entre les balles.
+-Implémenter d'autres formes géométriques.
