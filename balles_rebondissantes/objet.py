@@ -1,25 +1,20 @@
-#placer desvecteurs pour savoir vers où rebondi la balle.
-
-
 from math import *
-from time import *
-
 import sys, os
+
 pathname = os.path.dirname(sys.argv[0])
 os.chdir (os.path.abspath(pathname))
 try:
     os.chdir ("ressources")
-except:
+except: #idle a un comportement bizarre avec ça, alors je préfère couvrir tous les cas, même si je ne l'utilise pas souvent.
     pass
 
 
 def prod_scal(u,v):
-    u = list(u)
-    v = list(v)
     return sum([x * y for x, y in zip(u, v)])
 
 def norm(u):
     return sqrt(prod_scal(u,u))
+
 #map
 def make_grille(nbCasesY, nbCasesX):
     grille_obstacle = [0]*nbCasesY
@@ -28,7 +23,8 @@ def make_grille(nbCasesY, nbCasesX):
     
     for i in range(nbCasesX):
         for j in range(nbCasesY):
-            grille_obstacle[j][i] = ((i-nbCasesX//2)**2>-500*j+300000)#300000
+            #pour modifier le fond au début
+            grille_obstacle[j][i] = ((i-nbCasesX//2)**2>-500*j+400000) #parabole
             #grille_obstacle[j][i] = 100 < j
 
     return grille_obstacle
@@ -40,7 +36,7 @@ def sgn(x):
 class Balle():
     acceleration = 9.81
     def __init__(self, rayon, posx, posy, perte_energie):
-        self.rebond = 1 - 0.1*perte_energie
+        self.rebond = 1 - 0.1*perte_energie  #coefficiant rebond
         self.frottement = 0.1*perte_energie
         self.vitesse = 0
         self.position_X = posx 
@@ -60,8 +56,8 @@ class Balle():
         self.vitesse = norm((vx,vy))
         self.direction = (atan2(vy/self.vitesse,vx/self.vitesse) + pi) % (2*pi) - pi
   
-    def frot_rebond(self, angle_vecteur_collision):
-        coeff = abs(cos(angle_vecteur_collision - self.direction)) 
+    def frot_rebond(self, angle_vecteur_collision): #perte d'energie lorsd'une collision contre un mur
+        coeff = abs(cos(angle_vecteur_collision - self.direction))  #la perte d'energie varie selon l'écrasement de la balle, donc selon l'angle avec lequel elle frappe le mur
         vx = cos(angle_vecteur_collision)*self.vitesse
         vy = sin(angle_vecteur_collision)*self.vitesse
 
@@ -77,6 +73,7 @@ class Balle():
 
 
 def se_rapproche(balle, balle2, temps, m):
+    #si les balles s'éloignent ne pas faire de collision 
     posx = balle.position_X
     posy = balle.position_Y
     posx2 = balle2.position_X
@@ -94,13 +91,7 @@ def se_rapproche(balle, balle2, temps, m):
 
 ###________________Collisions balles___________________:
 def collision_balles(balle, balle2):
-    #si les balles s'éloignes ne pas faire de collision !
-    #mauvais balle.direction !, calculé dans le mauvais sens dans certains cas, regarder la collision mur
-    #cosa qui varie de -0.18 à -0.007 sans raison (balle.direction)
     #de la balle 1 vers la balle 2:
-    end = (balle.position_X, balle.position_Y)
-    end2 = (balle2.position_X, balle2.position_Y)
-
     vect_collision = (balle.position_X - balle2.position_X, balle.position_Y - balle2.position_Y)
     angle_balle = balle.direction
     angle_balle2 = balle2.direction
@@ -111,25 +102,16 @@ def collision_balles(balle, balle2):
     p_t = cosa * p_balle * sqrt(balle.rebond) #puissance transmise = projection de la puissance de balle1 sur le vecteur collision
     b = angle_collision #angle cercle trigo en radian du vecteur de balle 1 à balle 2
     vx = cos(angle_balle) * balle.vitesse
-    #print("vx=",vx)
     avx = vx
     vx -= cos(b)*p_t #ça sera modifié selon la masse des 2 balles
-    #print("vx=",vx)
     vy = sin(angle_balle)*balle.vitesse
     
-    #print("cosa = ", cosa,"b = ",b,"cos b =",cos(b))
-    #print(balle.vitesse, p_t)
-    #print((angle_balle + pi)%(2*pi)-pi, (b + pi)%(2*pi) - pi)
-    #print("vy = ",vy)
     avy = vy
     vy -= sin(b)*p_t
-    #print("vy=",vy)
     
     vx2 = cos(angle_balle2)*balle2.vitesse
-    #print("vx2=",vx2)
     avx2 = vx2
     vx2 += cos(b)*p_t
-    #print("vx2=",vx2)
     vy2 = sin(angle_balle2)*balle2.vitesse
     avy2 = vy2
     vy2 += sin(b)*p_t
@@ -146,12 +128,6 @@ def collision_balles(balle, balle2):
     vx += cos(b)*p_t
     vy += sin(b)*p_t
     
-    """
-    print("vy=",vy)
-    print("vx=",vx)
-    print("vx2=",vx2)
-    print("angle_collision2 = ", angle_collision2)
-    """
     balle.vitesse = norm((vx, vy))
     balle2.vitesse = norm((vx2, vy2))
     balle.direction = atan2(vy,vx)
@@ -172,8 +148,6 @@ def collision_balles(balle, balle2):
     balle2.position_X += tpx2
     balle2.position_Y -= tpy2
 
-    return ((end[0] + 30*(vx - avx), end[1] + 30*(vy - avy)), (end2[0] + 30*(vx2 - avx2), end2[1] + 30*(vy2 - avy2)))
-
 
 ###____________________Collision mur____________________:
 def collision_mur(balle, grille_obstacle,liste_point_collision, m, precision, taille_mur, fenetreX):
@@ -182,8 +156,8 @@ def collision_mur(balle, grille_obstacle,liste_point_collision, m, precision, ta
     nombreDePointsCollision = 0
     for i in range(-1,len(liste_point_collision)-1):
         
-        if grille_obstacle[int((balle.position_Y+liste_point_collision[i][1])/taille_mur)][int((balle.position_X+liste_point_collision[i][0])/taille_mur)] + grille_obstacle[int((balle.position_Y+liste_point_collision[i+1][1])/taille_mur)][int((balle.position_X+liste_point_collision[i+1][0])/taille_mur)] == 1:
-            points_collision.append([.5*(liste_point_collision[i][0]+liste_point_collision[i+1][0]),.5*(liste_point_collision[i][1]+liste_point_collision[i+1][1])])
+        if grille_obstacle[int((balle.position_Y+liste_point_collision[i][1])/taille_mur)][int((balle.position_X+liste_point_collision[i][0])/taille_mur)] + grille_obstacle[int((balle.position_Y+liste_point_collision[i+1][1])/taille_mur)][int((balle.position_X+liste_point_collision[i+1][0])/taille_mur)] == 1:  #si un point autour de la balle est en collision avec le mur
+            points_collision.append([.5*(liste_point_collision[i][0]+liste_point_collision[i+1][0]),.5*(liste_point_collision[i][1]+liste_point_collision[i+1][1])])    #on rajoute ce point à la liste
 
         if grille_obstacle[int((balle.position_Y+liste_point_collision[i][1])/taille_mur)][int((balle.position_X+liste_point_collision[i][0])/taille_mur)] == 1:
             nombreDePointsCollision += 1
@@ -249,4 +223,5 @@ def collision_mur(balle, grille_obstacle,liste_point_collision, m, precision, ta
 
     testCollision = True 
     repet = 0
+
 
