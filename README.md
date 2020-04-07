@@ -8,7 +8,6 @@ Pour changer les paramètres du jeu (taille des balles, rebond, vitesse du jeu e
 
 Cette version fonctionne, mais reste à rajouter:
 -Les balles plus grosses doivent avoir un masse plus importante
--Optimisation des balles quand elles ne bougent pas (si les forces se compensent parfaitements, ne plus faire bouger la balle jusqu'à ce qu'une des forces soit modifiée), ça évitera des calcules inutiles;
 -Pouvoir enregistrer le décor dans un fichier.
 -Enregistrer la dernière modification pour pouvoir revenir en arrière.
 -Mettre des frottements entre les balles.
