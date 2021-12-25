@@ -12,8 +12,8 @@ mode 3: rajouter de la matière. C'est l’opposé du mode 2. Même utilisation 
 Pour changer les paramètres du jeu (taille des balles, rebond, vitesse du jeu etc. Il faut se rendre dans le main.py directement).
 
 Cette version fonctionne, mais reste à rajouter:  
--Les balles plus grosses doivent avoir un masse plus importante  
--Pouvoir enregistrer le décor dans un fichier.  
--Enregistrer la dernière modification pour pouvoir revenir en arrière.  
--Mettre des frottements entre les balles.  
--Implémenter d'autres formes géométriques.
+- Les balles plus grosses doivent avoir un masse plus importante  
+- Pouvoir enregistrer le décor dans un fichier.  
+- Enregistrer la dernière modification pour pouvoir revenir en arrière.  
+- Mettre des frottements entre les balles.  
+- Implémenter d'autres formes géométriques. (Fait dans un autre jeu)
